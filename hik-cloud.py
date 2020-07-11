@@ -1,7 +1,12 @@
-# https://www.hik-cloud.com/portal/index.html#/
+# https://www.hik-cloud.com/chain/login/index.html#/login
+
+# 显示等待
+# https://www.cnblogs.com/syayy/p/11720256.html
 
 from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
 import time
+
 
 # 前台开启浏览器模式
 def openChrome():
@@ -19,15 +24,17 @@ def openChrome():
 def init(driver):
     url = "https://www.hik-cloud.com/chain/login/index.html#/login"
     driver.get(url)
+    driver.implicitly_wait(5)
     # driver.quit()
-    #输入用户名和密码
-    elem_user = driver.find_elements_by_class_name("el-input__inner")
-    print(elem_user)
-
+    # 输入用户名和密码
+    driver.find_element_by_xpath("//input[@placeholder='请输入用户名']").send_keys("13792886247")
     driver.find_element_by_xpath("//input[@type='password']").send_keys("Buchou@0306")
-
-
-
+    driver.find_element_by_xpath("//button").click()
+    print("登录中....")
+    driver.find_element_by_id("HKAppSceanPage").click()
+    print("登录成功")
+    # driver.find_elements_by_xpath("//span[@class='el-menu-item--text']").click()
+    driver.find_element_by_css_selector(".el-menu-item--text").click()
 
 # 方法主入口
 if __name__ == '__main__':

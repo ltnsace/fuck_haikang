@@ -5,7 +5,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.select import Select
 import time
 import win32gui
-
+import openpyxl
 import pyautogui
 
 
@@ -42,10 +42,12 @@ def operationAuth(driver):
     time.sleep(2)
     driver.find_element_by_xpath("//a[@ng-bind='oLan.config']").click()
     advanced_setting(driver)
+    osd(driver)
     region_cover(driver)
     record_project(driver)
     storage_manage(driver)
     video_setting(driver)
+    record_device_num(driver)
     yunmou(driver)
 def advanced_setting(driver):
 
@@ -67,7 +69,32 @@ def advanced_setting(driver):
         driver.find_element_by_xpath("//button[@class='btn btn-primary btn-save']").click()
     print("萤石云配置成功")
 
+#osd配置
+def osd(driver):
+    driver.find_element_by_xpath('//span[@ng-bind="oMenuLan.image"]').click()
+    time.sleep(1)
+    driver.find_element_by_xpath('//a[@ng-bind="oImageLan.OSDSettings"]').click()
+    time.sleep(1)
+    driver.find_element_by_xpath('//input[@ng-model="oOsdParams.cameraName"]').clear()
+    book = openpyxl.load_workbook('养户摄像头对应表.xlsx')
+    sheet = book.worksheets[0]
 
+    for column in sheet.columns:
+        for i in range(len(column)):
+            if (column[i].value == None):
+                devices_num = i
+                print("已录入设备数目为" + str(devices_num))
+                break
+    for column in sheet.columns:
+        name = column[devices_num].value
+        break
+    print("当前录入养户为" + name)
+    book.close()
+    driver.find_element_by_xpath('//input[@ng-model="oOsdParams.cameraName"]').send_keys(name)
+    driver.find_element_by_xpath('//button[@ng-click="save()"]').click()
+    print("osd修改完成")
+
+#遮挡区域配置
 def region_cover(driver):
     driver.find_element_by_xpath('//span[@class="menu-icon event-icon"]').click()
     time.sleep(1)
@@ -110,8 +137,8 @@ def region_cover(driver):
         action.perform()
         driver.find_element_by_xpath('//button[@class="btn btn-primary btn-save"]').click()
         print("绘制遮挡完成")
-        driver.find_element_by_xpath('//div[@class ="step last"]').click()
-        time.sleep(1)
+    driver.find_element_by_xpath('//div[@class ="step last"]').click()
+    time.sleep(1)
     if(driver.find_element_by_xpath('//input[@id="enableVideoTamper"]').is_selected()!=True):
         driver.find_element_by_xpath('//input[@id="enableVideoTamper"]').click()
     if(driver.find_element_by_xpath('//input[@ng-click="alarmLinkAll()"]').is_selected()!=True):
@@ -175,6 +202,37 @@ def storage_manage(driver):
 
     driver.find_element_by_xpath('//span[@ng-bind="oLan.save"]').click()
     print("存储配置完成")
+
+def record_device_num(driver):
+    driver.find_element_by_xpath('//span[@class="menu-icon system-icon"]').click()
+    time.sleep(1)
+    driver.find_element_by_xpath('//span[@ng-bind="oMenuLan.systemSettings"]').click()
+    time.sleep(1)
+    device_num=driver.find_element_by_xpath('//input[@ng-model = "oSettingBasicInfo.szSerialNo"]').get_attribute('value')
+    print("序列号为"+device_num)
+    try:
+        book = openpyxl.load_workbook('养户摄像头对应表.xlsx')
+        sheet = book.worksheets[0]
+        rows = sheet.max_row
+        cols = sheet.max_column
+        for i in range(1, rows):
+            if (sheet.cell(row=i, column=2).value == None):
+                sheet.cell(row=i, column=2, value=device_num)
+                break
+        book.save('养户摄像头对应表.xlsx')
+        book.close()
+    except:
+        print("录入设备序列号失败，把excel关闭，不然读写不了")
+        print("录入设备序列号失败，把excel关闭，不然读写不了")
+        print("录入设备序列号失败，把excel关闭，不然读写不了")
+        print("录入设备序列号失败，把excel关闭，不然读写不了")
+        print("录入设备序列号失败，把excel关闭，不然读写不了")
+        print("录入设备序列号失败，把excel关闭，不然读写不了")
+        print("录入设备序列号失败，把excel关闭，不然读写不了")
+        print("录入设备序列号失败，把excel关闭，不然读写不了")
+        print("录入设备序列号失败，把excel关闭，不然读写不了")
+
+
 def yunmou(driver):
     driver.close()
     # 加启动配置
@@ -191,6 +249,16 @@ def yunmou(driver):
 if __name__ == '__main__':
     # 加启动配置
     driver = openChrome()
+    print('''
+    请确认以下事项:
+    1.同一内网只能连一台摄像头，如果公司其他人也在连着同一wifi配置摄像头，请切换wifi或者等对方配完再配
+    2.内网更改摄像头信息时后台过程中不要移动鼠标直到配置完成
+    3.配置过程中不要打开excel，否则会导致无法写入
+    4.一定要用管理员权限打开本文件!!!!!!!!否则必定出错!!!!!!!!
+    5.配置时保持chromedriver.exe打开
+    确认无误后按任意键开始自动配置摄像头
+    ''')
+    input()
     operationAuth(driver)
     print('''
     ```````````````````````````*******``.............................```**`*`*******

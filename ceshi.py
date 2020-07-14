@@ -24,4 +24,5 @@ hwnd = win32gui.FindWindow(None, '雷电模拟器')
 app = QApplication(sys.argv)
 screen = QApplication.primaryScreen()
 img = screen.grabWindow(hwnd).toImage()
-img.save("screenshotxxx.jpg")
+img.save("screenshot.jpg")
+
